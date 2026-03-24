@@ -10,7 +10,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "npx tsx --test tests/payload.test.ts",
+    "test": "bun test",
     "dev": "echo 'Add to your opencode.json: \"plugin\": [\"file://'$(pwd)'/src/index.ts\"]' && echo 'Then run: opencode'"
   },
   "keywords": [
@@ -24,6 +24,7 @@
     "name": "Warp",
     "url": "https://warp.dev"
   },
+  "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/warpdotdev/opencode-warp",
   "repository": {

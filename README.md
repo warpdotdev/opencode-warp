@@ -54,7 +54,7 @@ This plugin uses Warp's [pluggable notifications](https://docs.warp.dev/features
 The plugin hooks into these OpenCode events:
 - **session.created** — confirms the plugin is active
 - **session.idle** — fires when OpenCode finishes responding, includes your prompt and the response
-- **permission.asked** — fires when OpenCode needs tool approval
+- **permission.updated** / **permission.asked** — fires when OpenCode needs tool approval
 - **message.updated** — fires when a user prompt is submitted
 - **tool.execute.after** — fires when a tool call completes
 
