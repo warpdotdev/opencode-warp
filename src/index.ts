@@ -7,12 +7,12 @@ import { warpNotify } from "./notify"
 const PLUGIN_VERSION = "0.1.0"
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
-function truncate(str: string, maxLen: number): string {
+export function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str
   return str.slice(0, maxLen - 3) + "..."
 }
 
-function extractTextFromParts(parts: Part[]): string {
+export function extractTextFromParts(parts: Part[]): string {
   return parts
     .filter((p): p is Part & { type: "text"; text: string } =>
       p.type === "text" && "text" in p && Boolean(p.text),
@@ -125,31 +125,10 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
           return
         }
 
-        case "message.updated": {
-          const message = event.properties.info
-          if (message.role !== "user") return
-
-          const sessionId = message.sessionID
-
-          // message.updated doesn't carry parts directly — fetch the message
-          let queryText = ""
-          try {
-            const result = await client.session.message({
-              path: { id: sessionId, messageID: message.id },
-            })
-            if (result.data) {
-              queryText = extractTextFromParts(result.data.parts)
-            }
-          } catch {
-            // Fall back to using summary title if available
-            queryText = message.summary?.title ?? ""
-          }
-
-          if (!queryText) return
-
-          const body = buildPayload("prompt_submit", sessionId, cwd, {
-            query: truncate(queryText, 200),
-          })
+        case "permission.replied": {
+          const { sessionID, response } = event.properties
+          if (response === "reject") return
+          const body = buildPayload("permission_replied", sessionID, cwd)
           warpNotify(NOTIFICATION_TITLE, body)
           return
         }
@@ -162,6 +141,21 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
           }
         }
       }
+    },
+
+    // Fires once per new user message — used to send the prompt_submit hook.
+    // (We avoid the generic message.updated event because OpenCode fires it
+    // multiple times per message, and a late duplicate can clobber the
+    // completion notification.)
+    "chat.message": async (input, output) => {
+      const cwd = directory || ""
+      const queryText = extractTextFromParts(output.parts)
+      if (!queryText) return
+
+      const body = buildPayload("prompt_submit", input.sessionID, cwd, {
+        query: truncate(queryText, 200),
+      })
+      warpNotify(NOTIFICATION_TITLE, body)
     },
 
     // Tool completion — fires after every tool call
