@@ -7,12 +7,12 @@ import { warpNotify } from "./notify"
 const PLUGIN_VERSION = "0.1.0"
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
-function truncate(str: string, maxLen: number): string {
+export function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str
   return str.slice(0, maxLen - 3) + "..."
 }
 
-function extractTextFromParts(parts: Part[]): string {
+export function extractTextFromParts(parts: Part[]): string {
   return parts
     .filter((p): p is Part & { type: "text"; text: string } =>
       p.type === "text" && "text" in p && Boolean(p.text),
