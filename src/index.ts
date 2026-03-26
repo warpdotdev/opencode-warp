@@ -52,6 +52,18 @@ function sendPermissionNotification(perm: Permission, cwd: string): void {
 }
 
 export const WarpPlugin: Plugin = async ({ client, directory }) => {
+  if (!process.env.WARP_CLI_AGENT_PROTOCOL_VERSION) {
+    await client.app.log({
+      body: {
+        service: "opencode-warp",
+        level: "warn",
+        message:
+          "⚠️ Please update Warp to get agent notifications — your terminal does not declare cli-agent protocol support",
+      },
+    })
+    return {}
+  }
+
   await client.app.log({
     body: {
       service: "opencode-warp",
