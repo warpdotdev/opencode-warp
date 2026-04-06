@@ -58,7 +58,7 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
         service: "opencode-warp",
         level: "warn",
         message:
-          "⚠️ Please update Warp to get agent notifications — your terminal does not declare cli-agent protocol support",
+          "⚠️ Detected unsupported Warp version. Please update Warp to use this pluginDetected unsupported Warp version. Please update Warp to use this plugin",
       },
     })
     return {}
