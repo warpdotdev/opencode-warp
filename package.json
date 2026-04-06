@@ -1,6 +1,6 @@
 {
   "name": "opencode-warp",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Warp terminal integration for OpenCode — native notifications and more",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -20,16 +20,13 @@
     "terminal",
     "notifications"
   ],
-  "author": {
-    "name": "Warp",
-    "url": "https://warp.dev"
-  },
+  "author": "Warp (https://warp.dev)",
   "type": "module",
   "license": "MIT",
   "homepage": "https://github.com/warpdotdev/opencode-warp",
   "repository": {
     "type": "git",
-    "url": "https://github.com/warpdotdev/opencode-warp.git"
+    "url": "git+https://github.com/warpdotdev/opencode-warp.git"
   },
   "devDependencies": {
     "@opencode-ai/plugin": "^1.0.0",
@@ -38,5 +35,15 @@
   },
   "peerDependencies": {
     "@opencode-ai/plugin": ">=1.0.0"
+  },
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "undici-types": "^7.18.2",
+    "zod": "^4.1.8"
+  },
+  "bugs": {
+    "url": "https://github.com/warpdotdev/opencode-warp/issues"
   }
 }
