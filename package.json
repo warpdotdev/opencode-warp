@@ -1,5 +1,5 @@
 {
-  "name": "opencode-warp",
+  "name": "@warp-dot-dev/opencode-warp",
   "version": "0.1.0",
   "description": "Warp terminal integration for OpenCode — native notifications and more",
   "main": "dist/index.js",
