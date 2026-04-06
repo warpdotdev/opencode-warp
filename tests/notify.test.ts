@@ -11,31 +11,25 @@ mock.module("fs", () => ({
 const { warpNotify } = await import("../src/notify")
 
 describe("warpNotify", () => {
-  const originalTermProgram = process.env.TERM_PROGRAM
+  const originalVersion = process.env.WARP_CLI_AGENT_PROTOCOL_VERSION
 
   afterEach(() => {
     writeSpy.mockClear()
-    if (originalTermProgram === undefined) {
-      delete process.env.TERM_PROGRAM
+    if (originalVersion === undefined) {
+      delete process.env.WARP_CLI_AGENT_PROTOCOL_VERSION
     } else {
-      process.env.TERM_PROGRAM = originalTermProgram
+      process.env.WARP_CLI_AGENT_PROTOCOL_VERSION = originalVersion
     }
   })
 
-  it("skips when TERM_PROGRAM is not set", () => {
-    delete process.env.TERM_PROGRAM
+  it("skips when WARP_CLI_AGENT_PROTOCOL_VERSION is not set", () => {
+    delete process.env.WARP_CLI_AGENT_PROTOCOL_VERSION
     warpNotify("title", "body")
     expect(writeSpy).not.toHaveBeenCalled()
   })
 
-  it("skips for other terminal programs", () => {
-    process.env.TERM_PROGRAM = "iTerm.app"
-    warpNotify("title", "body")
-    expect(writeSpy).not.toHaveBeenCalled()
-  })
-
-  it("writes OSC 777 sequence when inside Warp", () => {
-    process.env.TERM_PROGRAM = "WarpTerminal"
+  it("writes OSC 777 sequence when Warp declares protocol support", () => {
+    process.env.WARP_CLI_AGENT_PROTOCOL_VERSION = "1"
     warpNotify("warp://cli-agent", '{"event":"stop"}')
     expect(writeSpy).toHaveBeenCalledTimes(1)
 
