@@ -11,7 +11,8 @@
     "build": "tsc",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "dev": "echo 'Add to your opencode.json: \"plugin\": [\"file://'$(pwd)'/src/index.ts\"]' && echo 'Then run: opencode'"
+    "dev": "echo 'Add to your opencode.json: \"plugin\": [\"file://'$(pwd)'/src/index.ts\"]' && echo 'Then run: opencode'",
+    "prepublishOnly": "tsc"
   },
   "keywords": [
     "opencode",

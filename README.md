@@ -22,7 +22,7 @@ Add the plugin to your `opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["opencode-warp"]
+  "plugin": ["@warp-dot-dev/opencode-warp"]
 }
 ```
 
@@ -80,7 +80,7 @@ bun run build
 
 ## Uninstall
 
-Remove `"opencode-warp"` from the `plugin` array in your `opencode.json`.
+Remove `"@warp-dot-dev/opencode-warp"` from the `plugin` array in your `opencode.json`.
 
 ## Contributing
 
