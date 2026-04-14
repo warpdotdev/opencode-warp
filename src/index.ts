@@ -1,8 +1,9 @@
 import type { Plugin } from "@opencode-ai/plugin"
-import type { Event, Part, Permission } from "@opencode-ai/sdk"
+import type { Event, Permission } from "@opencode-ai/sdk"
 
 import { buildPayload } from "./payload"
 import { warpNotify } from "./notify"
+import { truncate, extractTextFromParts } from "./utils"
 
 // Must be kept in sync with the "version" field in package.json.
 // NOTE: do not `export` this constant — opencode's legacy plugin loader
@@ -10,20 +11,6 @@ import { warpNotify } from "./notify"
 // is not a function ("Plugin export is not a function").
 const PLUGIN_VERSION = "0.1.4"
 const NOTIFICATION_TITLE = "warp://cli-agent"
-
-export function truncate(str: string, maxLen: number): string {
-  if (str.length <= maxLen) return str
-  return str.slice(0, maxLen - 3) + "..."
-}
-
-export function extractTextFromParts(parts: Part[]): string {
-  return parts
-    .filter((p): p is Part & { type: "text"; text: string } =>
-      p.type === "text" && "text" in p && Boolean(p.text),
-    )
-    .map((p) => p.text)
-    .join(" ")
-}
 
 function sendPermissionNotification(perm: Permission, cwd: string): void {
   const sessionId = perm.sessionID

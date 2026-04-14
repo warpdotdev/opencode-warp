@@ -1,6 +1,6 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
-import { truncate, extractTextFromParts } from "../src/index"
+import { truncate, extractTextFromParts } from "../src/utils"
 import { buildPayload } from "../src/payload"
 
 describe("truncate", () => {
