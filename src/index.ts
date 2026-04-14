@@ -3,8 +3,9 @@ import type { Event, Part, Permission } from "@opencode-ai/sdk"
 
 import { buildPayload } from "./payload"
 import { warpNotify } from "./notify"
+import pkg from "../package.json" with { type: "json" }
 
-const PLUGIN_VERSION = "0.1.0"
+const PLUGIN_VERSION = pkg.version
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
 export function truncate(str: string, maxLen: number): string {
@@ -166,6 +167,18 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
 
       const body = buildPayload("prompt_submit", input.sessionID, cwd, {
         query: truncate(queryText, 200),
+      })
+      warpNotify(NOTIFICATION_TITLE, body)
+    },
+
+    // Fires before a tool executes — used to detect the built-in
+    // "question" tool so Warp can notify the user that input is needed.
+    "tool.execute.before": async (input) => {
+      if (input.tool !== "question") return
+
+      const cwd = directory || ""
+      const body = buildPayload("question_asked", input.sessionID, cwd, {
+        tool_name: input.tool,
       })
       warpNotify(NOTIFICATION_TITLE, body)
     },

@@ -1,6 +1,7 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
 import { truncate, extractTextFromParts } from "../src/index"
+import { buildPayload } from "../src/payload"
 
 describe("truncate", () => {
   it("returns string unchanged when under maxLen", () => {
@@ -59,5 +60,27 @@ describe("extractTextFromParts", () => {
       { type: "tool_use" as const, id: "1", name: "bash", input: {} },
     ] as any[]
     assert.strictEqual(extractTextFromParts(parts), "")
+  })
+})
+
+describe("PLUGIN_VERSION", () => {
+  it("resolves to a valid semver string from package.json", async () => {
+    const pkg = await import("../package.json", { with: { type: "json" } })
+    const version = pkg.default.version
+    assert.ok(typeof version === "string", "version should be a string")
+    assert.match(version, /^\d+\.\d+\.\d+/, "version should be semver")
+  })
+})
+
+describe("question_asked event", () => {
+  it("builds a valid question_asked payload", () => {
+    const payload = JSON.parse(
+      buildPayload("question_asked", "s1", "/tmp/proj", {
+        tool_name: "question",
+      }),
+    )
+    assert.strictEqual(payload.event, "question_asked")
+    assert.strictEqual(payload.tool_name, "question")
+    assert.strictEqual(payload.session_id, "s1")
   })
 })

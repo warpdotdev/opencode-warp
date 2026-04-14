@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "strict": true,
+    "resolveJsonModule": true,
     "outDir": "dist",
     "declaration": true,
     "declarationMap": true,
