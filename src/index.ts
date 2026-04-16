@@ -59,7 +59,7 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
         service: "opencode-warp",
         level: "warn",
         message:
-          "⚠️ Detected unsupported Warp version. Please update Warp to use this pluginDetected unsupported Warp version. Please update Warp to use this plugin",
+          "⚠️ Detected unsupported Warp version. Please update Warp to use this plugin.",
       },
     })
     return {}
