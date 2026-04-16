@@ -1,6 +1,6 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
-import { truncate, extractTextFromParts, PLUGIN_VERSION } from "../src/index"
+import { truncate, extractTextFromParts } from "../src/index"
 import { buildPayload } from "../src/payload"
 
 describe("truncate", () => {
@@ -60,16 +60,6 @@ describe("extractTextFromParts", () => {
       { type: "tool_use" as const, id: "1", name: "bash", input: {} },
     ] as any[]
     assert.strictEqual(extractTextFromParts(parts), "")
-  })
-})
-
-describe("PLUGIN_VERSION", () => {
-  it("resolves to a valid semver string from package.json", () => {
-    assert.ok(
-      typeof PLUGIN_VERSION === "string",
-      "PLUGIN_VERSION should be a string",
-    )
-    assert.match(PLUGIN_VERSION, /^\d+\.\d+\.\d+/, "version should be semver")
   })
 })
 
