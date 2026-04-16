@@ -1,11 +1,18 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import type { Event, Part, Permission } from "@opencode-ai/sdk"
+import { readFileSync } from "node:fs"
 
 import { buildPayload } from "./payload"
 import { warpNotify } from "./notify"
-import pkg from "../package.json" with { type: "json" }
 
-const PLUGIN_VERSION = pkg.version
+// Read the version at runtime instead of `import pkg from "../package.json"`.
+// An import would pull package.json into tsc's compilation roots and shift
+// output paths (e.g. dist/src/index.js instead of dist/index.js).
+const pkg = JSON.parse(
+  readFileSync(new URL("../package.json", import.meta.url), "utf8"),
+) as { version: string }
+export const PLUGIN_VERSION = pkg.version
+    
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
 export function truncate(str: string, maxLen: number): string {
