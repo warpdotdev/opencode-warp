@@ -1,6 +1,6 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
-import { truncate, extractTextFromParts } from "../src/index"
+import { truncate, extractTextFromParts, PLUGIN_VERSION } from "../src/index"
 import { buildPayload } from "../src/payload"
 
 describe("truncate", () => {
@@ -64,11 +64,12 @@ describe("extractTextFromParts", () => {
 })
 
 describe("PLUGIN_VERSION", () => {
-  it("resolves to a valid semver string from package.json", async () => {
-    const pkg = await import("../package.json", { with: { type: "json" } })
-    const version = pkg.default.version
-    assert.ok(typeof version === "string", "version should be a string")
-    assert.match(version, /^\d+\.\d+\.\d+/, "version should be semver")
+  it("resolves to a valid semver string from package.json", () => {
+    assert.ok(
+      typeof PLUGIN_VERSION === "string",
+      "PLUGIN_VERSION should be a string",
+    )
+    assert.match(PLUGIN_VERSION, /^\d+\.\d+\.\d+/, "version should be semver")
   })
 })
 
