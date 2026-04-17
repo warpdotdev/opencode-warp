@@ -43,25 +43,35 @@ function sendPermissionNotification(perm: Permission, cwd: string): void {
 }
 
 export const WarpPlugin: Plugin = async ({ client, directory }) => {
+  // Fire-and-forget the init log: awaiting client.app.log here can deadlock
+  // opencode's plugin loader on some versions (e.g. 1.4.8).
   if (!process.env.WARP_CLI_AGENT_PROTOCOL_VERSION) {
-    await client.app.log({
-      body: {
-        service: "opencode-warp",
-        level: "warn",
-        message:
-          "⚠️ Detected unsupported Warp version. Please update Warp to use this plugin.",
-      },
-    })
+    client.app
+      .log({
+        body: {
+          service: "opencode-warp",
+          level: "warn",
+          message:
+            "⚠️ Detected unsupported Warp version. Please update Warp to use this plugin.",
+        },
+      })
+      .catch((err) => {
+        console.error("[opencode-warp] failed to emit init log:", err)
+      })
     return {}
   }
 
-  await client.app.log({
-    body: {
-      service: "opencode-warp",
-      level: "info",
-      message: "Warp plugin initialized",
-    },
-  })
+  client.app
+    .log({
+      body: {
+        service: "opencode-warp",
+        level: "info",
+        message: "Warp plugin initialized",
+      },
+    })
+    .catch((err) => {
+      console.error("[opencode-warp] failed to emit init log:", err)
+    })
 
   return {
     event: async ({ event }: { event: Event }) => {
