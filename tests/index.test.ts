@@ -1,7 +1,8 @@
-import { describe, it } from "node:test"
+import { describe, it, mock, beforeEach, afterEach } from "node:test"
 import assert from "node:assert/strict"
 import { truncate, extractTextFromParts } from "../src/utils"
 import { buildPayload } from "../src/payload"
+import { writeTty } from "../src/notify"
 
 describe("truncate", () => {
   it("returns string unchanged when under maxLen", () => {
@@ -60,6 +61,15 @@ describe("extractTextFromParts", () => {
       { type: "tool_use" as const, id: "1", name: "bash", input: {} },
     ] as any[]
     assert.strictEqual(extractTextFromParts(parts), "")
+  })
+})
+
+describe("writeTty", () => {
+  it("returns a boolean (does not throw on current platform)", () => {
+    // writeTty should gracefully return true/false without throwing,
+    // regardless of platform and whether a tty is actually available.
+    const result = writeTty("test-data")
+    assert.strictEqual(typeof result, "boolean")
   })
 })
 
