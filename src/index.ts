@@ -9,7 +9,7 @@ import { truncate, extractTextFromParts } from "./utils"
 // NOTE: do not `export` this constant — opencode's legacy plugin loader
 // treats every named export as a plugin function and throws if any export
 // is not a function ("Plugin export is not a function").
-const PLUGIN_VERSION = "0.1.6"
+const PLUGIN_VERSION = "0.1.7"
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
 function sendPermissionNotification(perm: Permission, cwd: string): void {
@@ -90,8 +90,17 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
                 case "session.idle": {
                     const sessionId = event.properties.sessionID
 
-                    // Fetch the conversation to extract last query and response
-                    // (port of on-stop.sh transcript parsing)
+                    if (sessionId) {
+                        try {
+                            const session = await client.session.get({
+                                path: { id: sessionId },
+                            })
+                            if (session.data?.parentID) return
+                        } catch {
+                            // If we can't fetch the session, fall through and notify anyway
+                        }
+                    }
+
                     let query = ""
                     let response = ""
 
