@@ -1,8 +1,8 @@
 import type { Plugin } from "@opencode-ai/plugin"
 import type { Event, Permission } from "@opencode-ai/sdk"
 
-import { buildPayload } from "./payload"
-import { warpNotify } from "./notify"
+import { buildPayload, buildPermissionPayload } from "./payload"
+import { warpNotify, supportsWarpCliAgentProtocol } from "./notify"
 import { truncate, extractTextFromParts } from "./utils"
 
 // Must be kept in sync with the "version" field in package.json.
@@ -13,39 +13,14 @@ const PLUGIN_VERSION = "0.1.6"
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
 function sendPermissionNotification(perm: Permission, cwd: string): void {
-    const sessionId = perm.sessionID
-    const toolName = perm.type || "unknown"
-    const metadata = perm.metadata || {}
-
-    let toolPreview = ""
-    if (typeof metadata.command === "string") {
-        toolPreview = metadata.command
-    } else if (typeof metadata.file_path === "string") {
-        toolPreview = metadata.file_path as string
-    } else if (typeof metadata.filePath === "string") {
-        toolPreview = metadata.filePath as string
-    } else {
-        const raw = JSON.stringify(metadata)
-        toolPreview = raw.slice(0, 80)
-    }
-
-    let summary = `Wants to run ${toolName}`
-    if (toolPreview) {
-        summary += `: ${truncate(toolPreview, 120)}`
-    }
-
-    const body = buildPayload("permission_request", sessionId, cwd, {
-        summary,
-        tool_name: toolName,
-        tool_input: metadata,
-    })
+    const body = buildPermissionPayload(perm.sessionID, cwd, perm.type || "unknown", perm.metadata || {})
     warpNotify(NOTIFICATION_TITLE, body)
 }
 
 export const WarpPlugin: Plugin = async ({ client, directory }) => {
     // Fire-and-forget the init log: awaiting client.app.log here can deadlock
     // opencode's plugin loader on some versions (e.g. 1.4.8).
-    if (!process.env.WARP_CLI_AGENT_PROTOCOL_VERSION) {
+    if (!supportsWarpCliAgentProtocol()) {
         client.app
             .log({
                 body: {

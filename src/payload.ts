@@ -1,4 +1,5 @@
 import path from "path"
+import { truncate } from "./utils"
 
 const PLUGIN_MAX_PROTOCOL_VERSION = 1
 
@@ -37,4 +38,34 @@ function buildPayload(
   return JSON.stringify({ ...base, ...extraFields })
 }
 
-export { buildPayload, negotiateProtocolVersion, PLUGIN_MAX_PROTOCOL_VERSION }
+function buildPermissionPayload(
+  sessionId: string,
+  cwd: string,
+  toolName: string,
+  metadata: Record<string, unknown>,
+): string {
+  let toolInput: { command?: string; file_path?: string } | undefined
+  let toolPreview = ""
+
+  if (typeof metadata.command === "string") {
+    toolPreview = metadata.command
+    toolInput = { command: truncate(metadata.command, 200) }
+  } else if (typeof metadata.file_path === "string") {
+    toolPreview = metadata.file_path
+    toolInput = { file_path: truncate(metadata.file_path, 200) }
+  } else if (typeof metadata.filePath === "string") {
+    toolPreview = metadata.filePath
+    toolInput = { file_path: truncate(metadata.filePath, 200) }
+  } else {
+    toolPreview = truncate(JSON.stringify(metadata), 80)
+  }
+
+  const summary = `Wants to run ${toolName}${toolPreview ? `: ${truncate(toolPreview, 120)}` : ""}`
+  return buildPayload("permission_request", sessionId, cwd, {
+    summary,
+    tool_name: toolName,
+    ...(toolInput ? { tool_input: toolInput } : {}),
+  })
+}
+
+export { buildPayload, buildPermissionPayload, negotiateProtocolVersion, PLUGIN_MAX_PROTOCOL_VERSION }
