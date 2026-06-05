@@ -1,7 +1,7 @@
 import { describe, it } from "node:test"
 import assert from "node:assert/strict"
 import { truncate, extractTextFromParts } from "../src/utils"
-import { buildPayload } from "../src/payload"
+import { buildPayload, buildPermissionPayload } from "../src/payload"
 
 describe("truncate", () => {
   it("returns string unchanged when under maxLen", () => {
@@ -73,5 +73,34 @@ describe("question_asked event", () => {
     assert.strictEqual(payload.event, "question_asked")
     assert.strictEqual(payload.tool_name, "question")
     assert.strictEqual(payload.session_id, "s1")
+  })
+})
+
+describe("permission_request event", () => {
+  it("does not include full patch metadata", () => {
+    const payload = JSON.parse(
+      buildPermissionPayload("s1", "/tmp/proj", "patch", {
+        diff: "a".repeat(10_000),
+        additions: 1,
+        deletions: 100,
+      }),
+    )
+
+    assert.strictEqual(payload.event, "permission_request")
+    assert.strictEqual(payload.tool_input, undefined)
+    assert.ok(payload.summary.length < 256)
+    assert.ok(JSON.stringify(payload).length < 512)
+  })
+
+  it("includes a bounded command preview", () => {
+    const payload = JSON.parse(
+      buildPermissionPayload("s1", "/tmp/proj", "bash", {
+        command: "a".repeat(10_000),
+      }),
+    )
+
+    assert.ok(payload.tool_input.command.length <= 200)
+    assert.ok(payload.summary.length < 256)
+    assert.ok(JSON.stringify(payload).length < 512)
   })
 })
