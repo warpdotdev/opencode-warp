@@ -12,7 +12,8 @@ import { writeFileSync } from "fs"
  * in-process (sharing the same ConPTY-connected stdout).
  */
 function warpNotify(title: string, body: string): void {
-  if (!supportsWarpCliAgentProtocol()) return
+  if (!process.env.WARP_CLI_AGENT_PROTOCOL_VERSION) return
+  if (process.env.TERM_PROGRAM && process.env.TERM_PROGRAM !== "WarpTerminal") return
 
   const sequence = `\x1b]777;notify;${title};${body}\x07`
 
@@ -28,13 +29,4 @@ function warpNotify(title: string, body: string): void {
   }
 }
 
-function supportsWarpCliAgentProtocol(): boolean {
-  if (!process.env.WARP_CLI_AGENT_PROTOCOL_VERSION) return false
-
-  // Warp's variables can leak into GUI apps launched from Warp. Keep allowing
-  // SSH sessions where TERM_PROGRAM is unset, but never write Warp OSC into a
-  // terminal that explicitly identifies itself as something else.
-  return !process.env.TERM_PROGRAM || process.env.TERM_PROGRAM === "WarpTerminal"
-}
-
-export { warpNotify, supportsWarpCliAgentProtocol }
+export { warpNotify }
