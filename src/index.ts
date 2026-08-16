@@ -71,6 +71,32 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
             console.error("[opencode-warp] failed to emit init log:", err)
         })
 
+    // `session.created` can fire before this plugin's handlers finish
+    // registering (plugin init is async), so Warp never sees the
+    // session_start handshake and keeps showing the "setup plugin"
+    // instructions even though the plugin is loaded (#17, #18).
+    // Re-emit session_start shortly after init for the most recent
+    // top-level session, unless the handler already sent one.
+    // Deferred past the event-bus attach; client.session.list can hang if
+    // called synchronously during plugin init.
+    let sessionStartSent = false
+    const initCwd = directory || ""
+    setTimeout(async () => {
+        if (sessionStartSent) return
+        try {
+            const result = await client.session.list()
+            const mainSession = result.data?.find((s) => !s.parentID)
+            if (!mainSession) return
+            sessionStartSent = true
+            const body = buildPayload("session_start", mainSession.id, initCwd, {
+                plugin_version: PLUGIN_VERSION,
+            })
+            warpNotify(NOTIFICATION_TITLE, body)
+        } catch {
+            // best-effort handshake; ignore failures
+        }
+    }, 2000)
+
     const subagentCache = new Map<string, boolean>()
 
     async function isSubagentSession(sessionId?: string): Promise<boolean> {
@@ -102,6 +128,7 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
                 case "session.created": {
                     const info = event.properties.info
                     if (info.parentID) return
+                    sessionStartSent = true
                     const body = buildPayload("session_start", info.id, cwd, {
                         plugin_version: PLUGIN_VERSION,
                     })
