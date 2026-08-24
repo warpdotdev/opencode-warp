@@ -11,6 +11,7 @@ import { truncate, extractTextFromParts } from "./utils"
 // is not a function ("Plugin export is not a function").
 const PLUGIN_VERSION = "0.1.7"
 const NOTIFICATION_TITLE = "warp://cli-agent"
+const PERMISSION_NOTIFY_DELAY_MS = 500
 
 function buildPermissionPayload(perm: Permission, cwd: string) {
     const toolName = perm.type || "unknown"
@@ -94,6 +95,38 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
         warpNotify(NOTIFICATION_TITLE, body)
     }
 
+    // Debounce permission notifications: if a permission.replied arrives
+    // within the grace period (e.g. Warp auto-approved in auto mode), the
+    // notification is cancelled. This avoids false "agent blocked"
+    // notifications while preserving them for genuine user prompts.
+    const pendingPermissionNotify = new Map<string, ReturnType<typeof setTimeout>>()
+
+    function schedulePermissionNotify(
+        requestId: string | undefined,
+        sessionId: string | undefined,
+        body: string,
+    ): void {
+        if (!requestId) {
+            void maybeWarpNotify(sessionId, body)
+            return
+        }
+        if (pendingPermissionNotify.has(requestId)) return
+        const timer = setTimeout(() => {
+            pendingPermissionNotify.delete(requestId)
+            void maybeWarpNotify(sessionId, body)
+        }, PERMISSION_NOTIFY_DELAY_MS)
+        pendingPermissionNotify.set(requestId, timer)
+    }
+
+    function cancelPermissionNotify(requestId: string | undefined): void {
+        if (!requestId) return
+        const timer = pendingPermissionNotify.get(requestId)
+        if (timer) {
+            clearTimeout(timer)
+            pendingPermissionNotify.delete(requestId)
+        }
+    }
+
     return {
         event: async ({ event }: { event: Event }) => {
             const cwd = directory || ""
@@ -156,7 +189,8 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
                 }
 
                 case "permission.updated": {
-                    await maybeWarpNotify(
+                    schedulePermissionNotify(
+                        event.properties.id,
                         event.properties.sessionID,
                         buildPermissionPayload(event.properties, cwd),
                     )
@@ -164,20 +198,31 @@ export const WarpPlugin: Plugin = async ({ client, directory }) => {
                 }
 
                 case "permission.replied": {
-                    const { sessionID, response } = event.properties
+                    const props = event.properties as {
+                        sessionID: string
+                        response?: string
+                        reply?: string
+                        permissionID?: string
+                        requestID?: string
+                    }
+                    cancelPermissionNotify(props.requestID ?? props.permissionID)
+                    const response = props.response ?? props.reply
                     if (response === "reject") return
-                    const body = buildPayload("permission_replied", sessionID, cwd)
-                    await maybeWarpNotify(sessionID, body)
+                    const body = buildPayload("permission_replied", props.sessionID, cwd)
+                    await maybeWarpNotify(props.sessionID, body)
                     return
                 }
 
                 default: {
-                    // permission.asked is listed in the opencode docs but has no SDK type.
-                    // Handle it with the same logic as permission.updated.
+                    // permission.asked exists in the v2 SDK but not v1;
+                    // handle it via the default case with the same debounce
+                    // logic as permission.updated.
                     if ((event as any).type === "permission.asked") {
-                        await maybeWarpNotify(
-                            (event as any).properties?.sessionID,
-                            buildPermissionPayload((event as any).properties, cwd),
+                        const props = (event as any).properties
+                        schedulePermissionNotify(
+                            props?.id,
+                            props?.sessionID,
+                            buildPermissionPayload(props, cwd),
                         )
                     }
                 }
