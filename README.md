@@ -15,7 +15,7 @@ Notifications appear in Warp's notification center and as system notifications, 
 
 ## Installation
 
-### From npm (recommended)
+### OpenCode 1: from npm (recommended)
 
 Add the plugin to your `opencode.json`:
 
@@ -25,6 +25,22 @@ Add the plugin to your `opencode.json`:
   "plugin": ["@warp-dot-dev/opencode-warp"]
 }
 ```
+
+### OpenCode 2
+
+OpenCode 2 runs `opencode.json` plugins in a background service that has no
+terminal, so they can't reach Warp. Add the plugin to your CLI config instead,
+`~/.config/opencode/cli.json`:
+
+```json
+{
+  "plugins": ["@warp-dot-dev/opencode-warp"]
+}
+```
+
+Don't add it to `opencode.json`, and don't use `opencode plugin add`: that
+command registers the package as a server plugin in `opencode.json`, where it
+fails to load.
 
 ### From local files
 

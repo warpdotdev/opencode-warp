@@ -4,6 +4,17 @@
   "description": "Warp terminal integration for OpenCode — native notifications and more",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./tui": {
+      "types": "./dist/tui.d.ts",
+      "default": "./dist/tui.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist"
   ],

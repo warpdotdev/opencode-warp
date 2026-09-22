@@ -4,13 +4,11 @@ import type { Event, Permission } from "@opencode-ai/sdk"
 import { buildPayload } from "./payload"
 import { warpNotify } from "./notify"
 import { truncate, extractTextFromParts } from "./utils"
+import { PLUGIN_VERSION, NOTIFICATION_TITLE } from "./constants"
 
-// Must be kept in sync with the "version" field in package.json.
-// NOTE: do not `export` this constant — opencode's legacy plugin loader
+// NOTE: do not re-export these constants — opencode's legacy plugin loader
 // treats every named export as a plugin function and throws if any export
 // is not a function ("Plugin export is not a function").
-const PLUGIN_VERSION = "0.1.7"
-const NOTIFICATION_TITLE = "warp://cli-agent"
 
 function buildPermissionPayload(perm: Permission, cwd: string) {
     const toolName = perm.type || "unknown"
