@@ -7,6 +7,7 @@ Official [Warp](https://warp.dev) terminal integration for [OpenCode](https://op
 ### 🔔 Native Notifications
 
 Get native Warp notifications when OpenCode:
+
 - **Completes a task** — with a summary showing your prompt and the response
 - **Needs your input** — when a permission request is pending
 - **Runs a tool** — status updates as tools execute
@@ -22,26 +23,42 @@ Add the plugin to your `opencode.json`:
 ```json
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugin": ["@warp-dot-dev/opencode-warp"]
+  "plugins": ["@warp-dot-dev/opencode-warp"]
 }
 ```
 
 ### From local files
 
-Copy or symlink the built plugin into your OpenCode plugins directory:
+Build the package, then point OpenCode at the built `dist` directory (not only `index.js`):
 
-```bash
-# Global
-cp dist/index.js ~/.config/opencode/plugins/opencode-warp.js
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": ["/absolute/path/to/opencode-warp/dist"]
+}
+```
 
-# Or project-level
-cp dist/index.js .opencode/plugins/opencode-warp.js
+Restart the OpenCode CLI after changing the plugin. V2 automatically loads the package's
+`./tui` entrypoint alongside the main plugin. Notifications run in the CLI, not in the
+background service, so they reach the Warp terminal attached to that CLI. For a remote
+server, add the package to `plugins` in your local `~/.config/opencode/cli.json` as well.
+
+### OpenCode V1
+
+OpenCode 1.18.29 and newer use the same package with the V1 `plugin` configuration key.
+Older V1 releases should keep the existing npm release pinned to
+`"@warp-dot-dev/opencode-warp@0.1.7"`, or load the legacy entrypoint from a local build:
+
+```json
+{
+  "plugin": ["file:///absolute/path/to/opencode-warp/dist/v1.js"]
+}
 ```
 
 ## Requirements
 
 - [Warp terminal](https://warp.dev) (macOS, Linux, or Windows)
-- [OpenCode](https://opencode.ai) CLI
+- [OpenCode](https://opencode.ai) CLI (V2: 2.0.18 or newer; V1: see above)
 
 ## How It Works
 
@@ -51,12 +68,12 @@ This plugin uses Warp's [pluggable notifications](https://docs.warp.dev/features
 2. Formats a concise notification payload
 3. Sends an OSC 777 escape sequence to Warp, which displays a native notification
 
-The plugin hooks into these OpenCode events:
-- **session.created** — confirms the plugin is active
-- **session.idle** — fires when OpenCode finishes responding, includes your prompt and the response
-- **permission.updated** / **permission.asked** — fires when OpenCode needs tool approval
-- **message.updated** — fires when a user prompt is submitted
-- **tool.execute.after** — fires when a tool call completes
+On V2, the CLI plugin listens to session creation, inbox admission, execution completion,
+permissions, forms, and tool lifecycle events. On V1, the server entrypoint uses the
+legacy events and hooks. Both suppress notifications for subagent sessions.
+V2 only notifies for the session currently displayed in this CLI and its open root-session
+tabs; other terminals' sessions are ignored. Queued prompts notify when delivered, not
+while waiting in the inbox.
 
 ## Configuration
 
@@ -80,7 +97,8 @@ bun run build
 
 ## Uninstall
 
-Remove `"@warp-dot-dev/opencode-warp"` from the `plugin` array in your `opencode.json`.
+Remove `"@warp-dot-dev/opencode-warp"` from the `plugins` array in your `opencode.json`
+(V1: `plugin`), and from `cli.json` if you added it there.
 
 ## Contributing
 
