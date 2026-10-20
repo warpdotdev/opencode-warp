@@ -2,16 +2,23 @@
   "name": "@warp-dot-dev/opencode-warp",
   "version": "0.1.7",
   "description": "Warp terminal integration for OpenCode — native notifications and more",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js",
+    "./tui": "./dist/tui.js"
+  },
+  "peerDependencies": {
+    "@opencode/plugin": "^2.0.0"
+  },
   "files": [
-    "dist"
+    "dist",
+    "tui.js"
   ],
   "scripts": {
     "build": "rm -rf dist && tsc",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "dev": "echo 'Add to your opencode.json: \"plugin\": [\"file://'$(pwd)'/src/index.ts\"]' && echo 'Then run: opencode'",
+    "dev": "echo 'Add \"@warp-dot-dev/opencode-warp\" to ~/.config/opencode/cli.json under plugins.' && echo 'Then run: opencode'",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -30,17 +37,15 @@
     "url": "git+https://github.com/warpdotdev/opencode-warp.git"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "^1.0.0",
     "@types/node": "^25.5.0",
+    "solid-js": "^1.9.17",
     "typescript": "^5.0.0"
-  },
-  "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
   },
   "directories": {
     "test": "tests"
   },
   "dependencies": {
+    "@opencode/client": "^2.0.32",
     "undici-types": "^7.18.2",
     "zod": "^4.1.8"
   },
