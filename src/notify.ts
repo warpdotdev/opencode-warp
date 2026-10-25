@@ -2,8 +2,8 @@ import { writeFileSync } from "fs"
 
 /**
  * Send a Warp notification via OSC 777 escape sequence.
- * Only emits when Warp declares cli-agent protocol support,
- * avoiding garbled output in other terminals (and working over SSH).
+ * Only emits when Warp declares cli-agent protocol support and the current
+ * terminal does not explicitly identify itself as another terminal.
  *
  * On Unix we write to /dev/tty so the sequence bypasses any
  * stdout redirection or terminal-multiplexer capture.
@@ -13,6 +13,7 @@ import { writeFileSync } from "fs"
  */
 function warpNotify(title: string, body: string): void {
   if (!process.env.WARP_CLI_AGENT_PROTOCOL_VERSION) return
+  if (process.env.TERM_PROGRAM && process.env.TERM_PROGRAM !== "WarpTerminal") return
 
   const sequence = `\x1b]777;notify;${title};${body}\x07`
 

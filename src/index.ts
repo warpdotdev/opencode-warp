@@ -9,7 +9,7 @@ import { truncate, extractTextFromParts } from "./utils"
 // NOTE: do not `export` this constant — opencode's legacy plugin loader
 // treats every named export as a plugin function and throws if any export
 // is not a function ("Plugin export is not a function").
-const PLUGIN_VERSION = "0.1.7"
+const PLUGIN_VERSION = "0.1.8"
 const NOTIFICATION_TITLE = "warp://cli-agent"
 
 function buildPermissionPayload(perm: Permission, cwd: string) {
