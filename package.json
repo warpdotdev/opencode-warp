@@ -1,9 +1,26 @@
 {
   "name": "@warp-dot-dev/opencode-warp",
-  "version": "0.1.7",
-  "description": "Warp terminal integration for OpenCode — native notifications and more",
+  "version": "0.2.0",
+  "description": "Warp terminal integration for OpenCode - native notifications and more",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./tui": {
+      "types": "./dist/tui.d.ts",
+      "import": "./dist/tui.js",
+      "default": "./dist/tui.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -11,7 +28,7 @@
     "build": "rm -rf dist && tsc",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "dev": "echo 'Add to your opencode.json: \"plugin\": [\"file://'$(pwd)'/src/index.ts\"]' && echo 'Then run: opencode'",
+    "dev": "tsc && node -e 'console.log(JSON.stringify({plugins: [process.cwd() + \"/dist\"]}, null, 2))'",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -30,19 +47,21 @@
     "url": "git+https://github.com/warpdotdev/opencode-warp.git"
   },
   "devDependencies": {
-    "@opencode-ai/plugin": "^1.0.0",
+    "@opencode/client": "^2.2.4",
+    "@opencode/plugin": "^2.2.4",
     "@types/node": "^25.5.0",
     "typescript": "^5.0.0"
   },
   "peerDependencies": {
-    "@opencode-ai/plugin": ">=1.0.0"
+    "@opencode/plugin": "^2.2.4"
+  },
+  "peerDependenciesMeta": {
+    "@opencode/plugin": {
+      "optional": true
+    }
   },
   "directories": {
     "test": "tests"
-  },
-  "dependencies": {
-    "undici-types": "^7.18.2",
-    "zod": "^4.1.8"
   },
   "bugs": {
     "url": "https://github.com/warpdotdev/opencode-warp/issues"
